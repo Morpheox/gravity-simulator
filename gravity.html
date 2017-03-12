@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<script type="text/javascript">
+	var particles=new Array()
+	var G = 1
+	var W=5000;
+	var H=5000;
+	var S=40;
+	var N=100;
+	AP==true
+	function particle(x,y,mass){
+		this.x=x;
+		this.y=y;
+		this.mass=mass;
+		this.speedx=(Math.random()-Math.random())*2;
+		this.speedy=(Math.random()-Math.random())*2;
+		if(AP==true){
+		this.type=Math.round(Math.random());
+		}else{this.type=1;}
+	}
+	function fill(){
+	for(i=0;i<N;i++){
+		particles[i]=new particle(Math.random()*W,Math.random()*H,Math.random()*S+1)
+	}
+    }
+	function draw(){
+		var c=document.getElementById("draw");
+		var ctx=c.getContext("2d");
+		ctx.clearRect(0, 0, W, H);
+		ctx.beginPath();
+		ctx.fillStyle="#000000";
+		ctx.rect(0,0,W,H);
+		ctx.fill();
+		ctx.closePath();
+		
+		for(i=0;i<particles.length;i++){
+				if(particles[i].type==1){
+                    	ctx.fillStyle="#FFFFFF";
+                	}
+                	else if(particles[i].type==0)
+                	{
+                	   ctx.fillStyle="#FF0000";
+                	}
+                	else{
+                		ctx.fillStyle="#00FF00";
+                	}
+
+			ctx.beginPath();
+			ctx.arc(particles[i].x,particles[i].y,Math.sqrt(particles[i].mass/Math.PI),0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+		}
+	}
+	function gravity(){
+		if(GE==true){
+		particles[particles.length]=new particle(Math.random()*W,Math.random()*H,Math.random()*S+1)
+	    }
+		var p,p2,px,py,force,fscale;
+		for(i=0;i<particles.length;i++){
+			p=particles[i]
+			for(j=0;j<particles.length;j++){
+				if(i!=j){
+					p2=particles[j];
+					dx = p2.x - p.x;
+                	dy = p2.y - p.y;
+                	d = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2)) || 1
+					force = G * p.mass * p2.mass / Math.pow(d, 2);
+					fscale=0
+					if(p.type==p2.type){
+                    fscale = force / d;
+                    }
+                    else if(p.type!=2 && p2.type!=2){
+                    fscale= -force/d;
+                    }
+                    p.speedx += fscale * dx / p.mass;
+                    p.speedy += fscale * dy / p.mass;
+                    if(d<=(Math.sqrt(p.mass/Math.PI)+Math.sqrt(p2.mass/Math.PI))){
+                    	if(p.type==p2.type){
+						merge(i,j);
+                	}
+                	else if(p.type!=2 && p2.type!=2 && Math.abs(p.speedx+p2.speedx)+Math.abs(p.speedx+p2.speedx)>10)
+                	{
+                		mutate(i,j);
+                	}
+                	else if(p.type!=2 && p2.type!=2)
+                	{
+                		destroy(i,j);
+                	}
+
+                    }
+					
+				}
+			}
+			p.x+=p.speedx;
+			p.y+=p.speedy;
+			}
+			for(i=0;i<particles.length;i++){
+			p=particles[i]
+			if(p.x<0 || p.x>W){
+				particles.splice(i,1);
+			}
+			else if(p.y<0 || p.y>H){
+				particles.splice(i,1);
+			}
+		}
+	}
+	function merge(a,b){
+		var pa=particles[a];
+		var pb=particles[b];
+		if(pa.mass>=pb.mass)
+		{
+
+		pa.speedx=((pa.speedx*pa.mass)+(pb.speedx*pb.mass))/((pa.mass+pb.mass))
+		pa.speedy=((pa.speedy*pa.mass)+(pb.speedy*pb.mass))/((pa.mass+pb.mass))
+		pb.x=1000000
+		pb.y=1000000
+		pa.mass+=pb.mass
+		pb.mass=0.00001
+	    }
+	    else
+		{
+
+		pb.speedx=((pb.speedx*pb.mass)+(pa.speedx*pa.mass))/((pb.mass+pa.mass))
+		pb.speedy=((pb.speedy*pb.mass)+(pa.speedy*pa.mass))/((pb.mass+pa.mass))
+		pa.x=100000
+		pa.y=100000
+		pb.mass+=pa.mass
+		pa.mass=0.00001
+	    }
+
+	}
+		function mutate(a,b){
+		var pa=particles[a];
+		var pb=particles[b];
+		if(pa.mass>=pb.mass)
+		{
+
+		pa.speedx=((pa.speedx*pa.mass)+(pb.speedx*pb.mass))/((pa.mass+pb.mass))
+		pa.speedy=((pa.speedy*pa.mass)+(pb.speedy*pb.mass))/((pa.mass+pb.mass))
+		pb.x=1000000
+		pb.y=1000000
+		pa.mass+=pb.mass
+		pb.mass=0.00001
+		pa.type=2
+
+	    }
+	    else
+		{
+
+		pb.speedx=((pb.speedx*pb.mass)+(pa.speedx*pa.mass))/((pb.mass+pa.mass))
+		pb.speedy=((pb.speedy*pb.mass)+(pa.speedy*pa.mass))/((pb.mass+pa.mass))
+		pa.x=100000
+		pa.y=100000
+		pb.mass+=pa.mass
+		pa.mass=0.00001
+		pb.type=2
+	    }
+
+	}
+		function destroy(a,b){
+		var pa=particles[a];
+		var pb=particles[b];
+		if(pa.mass>=pb.mass)
+		{
+
+		pa.speedx=((pa.speedx*pa.mass)+(pb.speedx*pb.mass))/((pa.mass+pb.mass))
+		pa.speedy=((pa.speedy*pa.mass)+(pb.speedy*pb.mass))/((pa.mass+pb.mass))
+		pb.x=1000000
+		pb.y=1000000
+		pa.mass-=pb.mass
+		pb.mass=0.00001
+
+	    }
+	    else
+		{
+
+		pb.speedx=((pb.speedx*pb.mass)+(pa.speedx*pa.mass))/((pb.mass+pa.mass))
+		pb.speedy=((pb.speedy*pb.mass)+(pa.speedy*pa.mass))/((pb.mass+pa.mass))
+		pa.x=100000
+		pa.y=100000
+		pb.mass-=pa.mass
+		pa.mass=0.00001
+	    }
+
+	}	
+	function distance(a,b){
+		var xs = 0;
+  		var ys = 0;
+ 
+  		xs = a.x - b.x;
+  		xs = xs * xs;
+ 
+  		ys = b.y - a.y;
+ 		ys = ys * ys;
+ 
+ 		return Math.sqrt( xs + ys );
+	}
+
+	function run(){
+		document.getElementById("draw").width=parseInt(document.getElementById("wi").value);
+		document.getElementById("draw").height=parseInt(document.getElementById("he").value);
+		W=parseInt(document.getElementById("wi").value);
+		H=parseInt(document.getElementById("he").value);
+		S=parseInt(document.getElementById("ma").value)-1;
+		N=parseInt(document.getElementById("ib").value);
+		G = parseFloat(document.getElementById("grav").value);
+		AP = document.getElementById("AntP").checked;
+		GE = document.getElementById("ge").checked;
+		document.getElementById("forms").style.display="none";
+		fill();
+		running=window.setInterval(function(){gravity()}, 50)
+		drawing=window.setInterval(function(){draw()}, 50);
+	}
+
+
+
+	</script>
+</head>
+<body>
+
+<form id="forms">
+<h2>GRAVITY</h2>
+<table>
+<tr><td><label>Gravity: (G)</label></td>
+<td><input type="number" id="grav" value="1"/></td></tr>
+<tr><td><label>Width of simulation: (pixels)</label></td>
+<td><input type="number" id="wi" value="1000"/></td></tr>
+<tr><td><label>Height of simulation: (pixels) </label></td>
+<td><input type="number" id="he" value="1000"/></td></tr>
+<tr><td><label>Maximum mass of generated bodies:</label></td>
+<td><input type="number" id="ma" value="20"/></td></tr>
+<tr><td><label>Initial bodies:</label></td>
+<td><input type="number" id="ib" value="100"/></td></tr>
+<tr><td><label>Antigravitation particles:</label></td><td><input type="checkbox" id="AntP" checked/></td></tr>
+<tr><td><label>Generate particles:</label></td><td><input type="checkbox" id="ge" checked/></td></tr>
+<tr><td></td><td><input type="button" onclick="run();" value="Simulate"/></td></tr>
+</table>
+</form>
+
+<canvas id="draw" width="100"  height ="100"></canvas>
+<script type="text/javascript">
+	
+
+
+</script>
+</body>
+</html>
